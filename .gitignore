@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# Ignore temporary video files and executables
+temp/
+*.exe
+
 # debug
 npm-debug.log*
 yarn-debug.log*
