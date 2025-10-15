@@ -9,7 +9,7 @@ interface Video {
   youtubeUrl: string;
   videoId: string;
   duration: number;
-  createdAt: Date; // Changed from string to Date
+  createdAt: Date; 
   _count: {
     questions: number;
   };
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Your Videos</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-black">Your Videos</h1>
         <Link 
           href="/videos/new" 
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md flex items-center gap-2"

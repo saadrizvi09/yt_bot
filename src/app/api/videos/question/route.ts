@@ -5,7 +5,6 @@ import { generateEmbedding, generateResponse } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
-    // FIX 1: Await auth() call
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -55,7 +54,6 @@ export async function POST(request: Request) {
     const questionEmbedding = await generateEmbedding(question);
     console.log('Question embedding generated');
 
-    // FIX 4: Try with lower similarity threshold first
     let relevantChunks = await db.$queryRaw`
       SELECT "chunkText", "startTime", "endTime", "chunkIndex",
       1 - ("chunkEmbedding" <=> ${questionEmbedding}::vector) AS similarity

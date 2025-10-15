@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Get video details
     const video = await db.video.findFirst({
@@ -45,7 +45,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Check if video exists and belongs to user
     const video = await db.video.findFirst({

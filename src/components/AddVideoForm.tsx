@@ -15,7 +15,6 @@ export default function AddVideoForm() {
     setIsLoading(true);
 
     try {
-      // Validate URL format
       const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/(.+)$/;
       if (!regex.test(youtubeUrl)) {
         throw new Error('Please enter a valid YouTube URL');
