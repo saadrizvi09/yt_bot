@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 // CORRECT ✅
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } } // <-- The fix is here
+  context: { params: { id: string } }
 ) {
   try {
     // Check authentication
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params; // <-- And the fix is here
+    const { id } = context.params;
 
     // Check if video exists and belongs to user
     const video = await db.video.findFirst({
