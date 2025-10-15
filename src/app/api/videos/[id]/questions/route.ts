@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 
+// CORRECT ✅
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } } // <-- The fix is here
 ) {
   try {
     // Check authentication
@@ -13,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = params; // <-- And the fix is here
 
     // Check if video exists and belongs to user
     const video = await db.video.findFirst({
@@ -43,4 +44,4 @@ export async function GET(
     console.error('Error fetching questions:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch questions' }, { status: 500 });
   }
-} 
+}
