@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 // CORRECT ✅
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<any> } // CRITICAL WORKAROUND: Next.js build is demanding params be Promise<any>.
 ) {
   try {
     // Check authentication

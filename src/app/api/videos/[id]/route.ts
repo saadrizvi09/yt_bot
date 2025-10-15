@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<any> } // CRITICAL WORKAROUND: Next.js build is demanding params be Promise<any>.
 ) {
   try {
     // Check authentication
@@ -13,7 +13,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
+    const resolvedParams = await params as { id: string };
+    const { id } = resolvedParams;
 
     // Get video details
     const video = await db.video.findFirst({
@@ -36,7 +37,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<any> } // CRITICAL WORKAROUND: Next.js build is demanding params be Promise<any>.
 ) {
   try {
     // Check authentication
@@ -45,7 +46,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
+    const resolvedParams = await params as { id: string };
+    const { id } = resolvedParams;
 
     // Check if video exists and belongs to user
     const video = await db.video.findFirst({
