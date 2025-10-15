@@ -21,7 +21,6 @@ export default function RootLayout({
         <body className={`${inter.className} min-h-screen flex flex-col`}>
           <main className="flex-1">{children}</main>
           <footer className="py-6 text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} YouTube Q&A. All rights reserved.</p>
           </footer>
         </body>
       </html>

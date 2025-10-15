@@ -24,13 +24,13 @@ export default async function LandingPage() {
         <nav className="flex items-center justify-between p-6 lg:px-8">
           <div className="flex lg:flex-1">
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              VideoAI
+              YT Bot
             </span>
           </div>
           <div className="flex gap-x-4">
             <Link
               href="/sign-in"
-              className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="text-sm m-1 font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Sign in
             </Link>
