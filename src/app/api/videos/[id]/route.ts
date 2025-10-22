@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getUserFromRequest } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export async function GET(
@@ -8,8 +8,8 @@ export async function GET(
 ) {
   try {
     // Check authentication
-    const { userId } = auth();
-    if (!userId) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -20,7 +20,7 @@ export async function GET(
     const video = await db.video.findFirst({
       where: {
         id,
-        userId,
+        userId: user.userId,
       },
     });
 
@@ -41,8 +41,8 @@ export async function DELETE(
 ) {
   try {
     // Check authentication
-    const { userId } = auth();
-    if (!userId) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -53,7 +53,7 @@ export async function DELETE(
     const video = await db.video.findFirst({
       where: {
         id,
-        userId,
+        userId: user.userId,
       },
     });
 
@@ -61,16 +61,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Video not found' }, { status: 404 });
     }
 
-    // Delete all related data first (due to foreign key constraints)
-    // Delete questions
-    await db.videoQuestion.deleteMany({
+    // Delete associated video embeddings
+    await db.videoEmbedding.deleteMany({
       where: {
         videoId: id,
       },
     });
 
-    // Delete embeddings
-    await db.videoEmbedding.deleteMany({
+    // Delete associated video questions
+    await db.videoQuestion.deleteMany({
       where: {
         videoId: id,
       },
@@ -88,4 +87,4 @@ export async function DELETE(
     console.error('Error deleting video:', error);
     return NextResponse.json({ error: error.message || 'Failed to delete video' }, { status: 500 });
   }
-} 
+}

@@ -1,9 +1,8 @@
 import './globals.css';
-import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'YouTube Video Q&A',
@@ -16,14 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={inter.variable}>
-        <body className={`${inter.className} min-h-screen flex flex-col`}>
-          <main className="flex-1">{children}</main>
-          <footer className="py-6 text-center text-sm text-muted-foreground">
-          </footer>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-gray-300`}>
+        <main className="flex-grow">
+          {children}
+        </main>
+      </body>
+    </html>
   );
 }

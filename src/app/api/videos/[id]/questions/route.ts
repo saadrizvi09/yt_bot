@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getUserFromRequest } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 // CORRECT ✅
@@ -8,19 +8,19 @@ export async function GET(
   { params }: { params: Promise<any> } // CRITICAL WORKAROUND: Next.js build is demanding params be Promise<any>.
 ) {
   try {
-    // Check authentication
-    const { userId } = auth();
-    if (!userId) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
+    const resolvedParams = await params as { id: string };
+    const { id } = resolvedParams;
 
     // Check if video exists and belongs to user
     const video = await db.video.findFirst({
       where: {
         id,
-        userId,
+        userId: user.userId,
       },
     });
 
@@ -32,7 +32,7 @@ export async function GET(
     const questions = await db.videoQuestion.findMany({
       where: {
         videoId: id,
-        userId,
+        userId: user.userId,
       },
       orderBy: {
         createdAt: 'desc',

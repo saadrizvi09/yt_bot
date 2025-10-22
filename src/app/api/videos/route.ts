@@ -1,41 +1,33 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getUserFromRequest } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const { userId } = auth();
-    if (!userId) {
+    console.log('API: /api/videos - GET request received.');
+    const user = getUserFromRequest(request);
+    if (!user) {
+      console.log('API: /api/videos - Unauthorized user. Returning 401.');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all videos for the user
+    console.log('API: /api/videos - User authenticated:', user.userId);
     const videos = await db.video.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        id: true,
-        title: true,
-        youtubeUrl: true,
-        videoId: true,
-        duration: true,
-        createdAt: true,
+      where: { userId: user.userId },
+      include: {
         _count: {
           select: {
-            questions: true,
-          },
-        },
+            embeddings: true,
+            questions: true
+          }
+        }
       },
+      orderBy: { createdAt: 'desc' }
     });
-
+    console.log(`API: /api/videos - Found ${videos.length} videos for user ${user.userId}`);
     return NextResponse.json(videos);
-  } catch (error: any) {
-    console.error('Error fetching videos:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch videos' }, { status: 500 });
+  } catch (err: any) {
+    console.error('API Error: /api/videos - Failed to fetch videos:', err);
+    return NextResponse.json({ error: err?.message || 'Failed to fetch videos' }, { status: 500 });
   }
 } 

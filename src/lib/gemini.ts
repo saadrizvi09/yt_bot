@@ -25,7 +25,7 @@ const limit = pLimit(1);
 // Get the Gemini model
 export const getGeminiModel = () => {
   return genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.0-flash-exp',
   });
 };
 
@@ -60,9 +60,23 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
 };
 
 // Generate response with rate limiting
+const retry = async <T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (retries > 0 && error.message.includes('503 Service Unavailable')) {
+      console.warn(`Retrying after ${delay}ms due to 503 error...`);
+      await new Promise(res => setTimeout(res, delay));
+      return retry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
+
 export const generateResponse = async (
   prompt: string,
-  context: string[]
+  context: string[],
+  maxOutputTokens = 800
 ): Promise<string> => {
   return limit(async () => {
     try {
@@ -90,11 +104,11 @@ export const generateResponse = async (
           temperature: 0.2,
           topP: 0.8,
           topK: 40,
-          maxOutputTokens: 800,
+          maxOutputTokens: maxOutputTokens,
         },
       });
 
-      const result = await chat.sendMessage(prompt);
+      const result = await retry(() => chat.sendMessage(prompt));
       return result.response.text();
     } catch (error: any) {
       console.error('Response generation error:', error);

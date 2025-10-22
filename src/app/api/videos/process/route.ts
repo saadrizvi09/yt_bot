@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getUserFromRequest } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { extractVideoId, getVideoDetails, downloadAudio, transcribeWithAssemblyAI, chunkTranscript, getTranscriptWithLangChain, getTranscriptNoAuth } from '@/lib/youtube';
 import { generateEmbedding } from '@/lib/gemini';
@@ -8,13 +8,13 @@ import pLimit from 'p-limit';
 const CONCURRENT_EMBEDDING_CALLS = 5; // Limit concurrent embedding calls
 const limit = pLimit(CONCURRENT_EMBEDDING_CALLS);
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   let video: any = null;
   
   try {
     // Check authentication
-    const { userId } = await auth();
-    if (!userId) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const existingVideo = await db.video.findFirst({
       where: {
         videoId,
-        userId,
+        userId: user.userId,
       },
     });
 
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         videoId,
         title: details.title,
         duration: details.duration || 0,
-        userId,
+        userId: user.userId,
       },
     });
 
@@ -273,15 +273,15 @@ export async function POST(request: Request) {
 }
 
 // GET endpoint to list user's videos
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const videos = await db.video.findMany({
-      where: { userId },
+      where: { userId: user.userId },
       include: {
         _count: {
           select: {

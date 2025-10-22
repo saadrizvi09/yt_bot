@@ -27,21 +27,24 @@ export function extractVideoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-// Fetch video details (title, duration)
 export async function getVideoDetails(videoId: string) {
   try {
-    // Using YouTube oEmbed API which doesn't require API key
-    const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch video details');
+    const loader = YoutubeLoader.createFromUrl(`https://www.youtube.com/watch?v=${videoId}`, {
+      language: "en",
+      addVideoInfo: true,
+    });
+
+    const docs = await loader.load();
+
+    if (docs.length === 0 || !docs[0] || !docs[0].metadata) {
+      throw new Error(`No video details found with LangChain for video ${videoId}.`);
     }
-    
-    const data = await response.json();
-    
+
+    const metadata = docs[0].metadata;
+
     return {
-      title: data.title,
-      duration: 0, // Will be updated after transcription
+      title: metadata.title || 'Untitled Video',
+      duration: metadata.duration || 0,
     };
   } catch (error) {
     console.error('Error fetching video details:', error);

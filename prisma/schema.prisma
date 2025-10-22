@@ -21,6 +21,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   
   emailAddress String    @unique
+  passwordHash String
   firstName    String
   lastName     String?
   
