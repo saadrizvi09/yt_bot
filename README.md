@@ -105,8 +105,9 @@ JWT_SECRET="your-super-secret-jwt-key"
 3.  **Processing:** The application will process the video, extracting its transcript (or generating one via AssemblyAI) and generating embeddings. This might take a moment depending on the video length.
 4.  **Ask Questions:** Once processed, navigate to the video's detail page. You can now ask questions about the video content in the provided text area.
 5.  **View Answers & History:** The AI's answer will appear, and your question will be added to the question history for easy reference.
-
 ## 📂 Project Structure
+
+```text
 .
 ├── prisma/                  # Prisma schema and migrations
 ├── public/                  # Static assets
@@ -134,7 +135,7 @@ JWT_SECRET="your-super-secret-jwt-key"
 ├── package.json
 ├── tsconfig.json
 └── README.md                # This file
-
+```
 ## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions for improvements or new features, please feel free to:
