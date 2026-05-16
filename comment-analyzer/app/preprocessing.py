@@ -118,30 +118,42 @@ def autocorrect_text(text: str) -> str:
 def detect_spam(text: str, author: str = "") -> bool:
     """
     Detect if a comment is spam based on keywords and patterns.
+    Uses multi-signal detection to reduce false positives (e.g., "VERY GOOD VIDEO").
+    
+    Spam Keywords: Instant spam (definitive indicator)
+    Other Signals: Require 2+ signals to flag as spam
     """
     text_lower = text.lower()
     
-    # Check for spam keywords
+    # SIGNAL 0: Spam keywords (strongest indicator - immediate flag)
     for keyword in settings.SPAM_KEYWORDS:
         if keyword.lower() in text_lower:
-            return True
+            return True  # Keywords alone are definitive spam
     
-    # Check for excessive caps (shouting)
+    # Count additional spam signals
+    spam_signals = 0
+    
+    # SIGNAL 1: Excessive caps (shouting)
+    # Changed threshold from 0.7 (70%) to 0.85 (85%) to avoid false positives
+    # "VERY GOOD VIDEO" = 86.7% but is legitimate enthusiasm
     if len(text) > 10:
         caps_ratio = sum(1 for c in text if c.isupper()) / len(text)
-        if caps_ratio > 0.7:
-            return True
+        if caps_ratio > 0.85:
+            spam_signals += 1
     
-    # Check for excessive emoji density
+    # SIGNAL 2: Excessive emoji density
+    # Changed threshold from 2.0 to 1.5 emoji per word
     emoji_count = emoji.emoji_count(text)
-    if len(text) > 0 and emoji_count / len(text.split()) > 2:
-        return True
+    if len(text) > 0:
+        emoji_per_word = emoji_count / len(text.split())
+        if emoji_per_word > 1.5:
+            spam_signals += 1
     
-    # Check for repeated characters indicating spam
+    # SIGNAL 3: Repeated characters (indicating spam like "!!!!!!!" or "sooooo")
     if re.search(r'(.)\1{4,}', text):
-        return True
+        spam_signals += 1
     
-    # Check for promo links/patterns
+    # SIGNAL 4: Promo/self-promotion patterns
     promo_patterns = [
         r'sub(scribe)?\s*(to)?\s*(my|me)',
         r'check\s*(out)?\s*(my|me)',
@@ -153,9 +165,13 @@ def detect_spam(text: str, author: str = "") -> bool:
     
     for pattern in promo_patterns:
         if re.search(pattern, text_lower):
-            return True
+            spam_signals += 1
+            break  # Count promo only once
     
-    return False
+    # Require at least 2 signals to flag as spam
+    # This prevents false positives like "VERY GOOD VIDEO" (only 1 signal: caps)
+    # But catches real spam like "BUY NOW!!! 🔥🔥" (3 signals: caps + emoji + promo)
+    return spam_signals >= 2
 
 
 def detect_troll(text: str) -> bool:

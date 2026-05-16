@@ -52,7 +52,7 @@ model Video {
 model VideoEmbedding {
   id                String  @id @default(cuid())
   
-  chunkEmbedding    Unsupported("vector(768)")
+  chunkEmbedding    Unsupported("vector(3072)")
   chunkText         String
   chunkIndex        Int
   startTime         Float?
